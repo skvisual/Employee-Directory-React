@@ -15,8 +15,8 @@ class Search extends Component {
   // When the component mounts, get a list of all employees and update this.state.employees
   componentDidMount() {
     API.search()
-      .then(res => {const employees = res.data.results.map(employees => ({name: res.name}));
-      this.setState({employees})})
+      .then(res => {
+      this.setState({employees: res.data.results, results: res.data.results})})
       .catch(err => console.log(err));
   }
 
@@ -27,19 +27,27 @@ class Search extends Component {
 
   handleFormSubmit = event => {
     event.preventDefault();
-    API.search(this.state.search)
-      .then(res => {
-        if (res.data.status === "error") {
-          throw new Error(res.data.message);
-        }
-        this.setState({ results: res.data.message, error: "" });
-      })
-      .catch(err => this.setState({ error: err.message }));
+    let searchResults = this.state.employees.filter(employees => {
+      let employeeFullName = (employees.name.first + " " + employees.name.last).toLowerCase()
+      if (employeeFullName.includes(this.state.search.toLowerCase())){
+        return true
+      } 
+      else{
+        return false
+      }
+    })
+    this.setState({results: searchResults})
   };
+
+  handleClear = event => {
+    event.preventDefault();
+    this.setState({results: this.state.employees})
+  }
   
   render() {
     return (
       <div>
+        {console.log("CHECK THIS ONE", this.state.employees)}
         <Container style={{ minHeight: "80%" }}>
           <h1 className="text-center">Employee Search</h1>
           <SearchForm
